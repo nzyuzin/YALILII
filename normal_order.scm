@@ -6,6 +6,7 @@
         ((quoted? exp) (text-of-quotation exp))
         ((assignment? exp) (eval-assignment exp env))
         ((definition? exp) (eval-definition exp env))
+        ((let? exp) (eval (let->combination exp) env))
         ((if? exp) (eval-if exp env))
         ((and? exp) (eval-and exp env))
         ((or? exp) (eval-or exp env))
@@ -227,6 +228,31 @@
 
 ;================================================================
 
+;; EXERCISE 4.6 LET
+;================================================================
+
+(define (let? exp)
+  (tagged-list? exp 'let))
+
+(define (let-bindings exp)
+  (cadr exp))
+
+(define (let-body exp)
+  (cddr exp))
+
+(define (let->combination exp)
+  (let 
+    ((let-variables 
+       (map (lambda (x) (car x))
+         (let-bindings exp)))
+     (let-values
+       (map (lambda (x) (cadr x))
+         (let-bindings exp))))
+    (append (list (append (list 'lambda let-variables) (let-body exp)))
+      let-values)))
+
+;================================================================
+
 ;;;SECTION 4.1.3
 
 (define (true? x)
@@ -247,7 +273,11 @@
         (cons (definition-variable (car expr)) def-names)
         (cons (definition-value (car expr)) def-values)
         rest-of-expr)
-      (fetch-defines (cdr expr) def-names def-values (append rest-of-expr (list (car expr)))))))
+      (fetch-defines 
+        (cdr expr)
+        def-names
+        def-values
+        (append rest-of-expr (list (car expr)))))))
 
 ; WORKS!
 
@@ -270,7 +300,6 @@
 
 ;; ==============================================================
 
-;(define (make-procedure parameters body env) (list 'procedure parameters body env))
 
 (define (make-procedure parameters body env)
   (list 'procedure parameters (scan-out-defines body) env))
@@ -394,9 +423,10 @@
         (list 'map map)
         (list 'filter filter)
         (list 'append append)
+        (list 'display display)
+        (list 'newline newline)
         (list 'accumulate accumulate)
         (list 'flat-map flat-map)
-        (list 'scan-out-defines scan-out-defines)
         ))
 
 (define (setup-environment)
