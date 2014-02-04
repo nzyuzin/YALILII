@@ -432,6 +432,7 @@
         (list 'display display)
         (list 'newline newline)
         (list 'apply apply)
+        (list 'quoted? quoted?)
         (list 'accumulate accumulate)
         (list 'flat-map flat-map)
         ))
