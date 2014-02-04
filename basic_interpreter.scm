@@ -292,11 +292,11 @@
     (set! rest-of-body (car scanned-out))
     (if (null? define-vars)
       rest-of-body
-      (append (list
+      (list (append (list
                 'let
-                (map (lambda (x) (list x '*unassigned*)) define-vars))
+                (map (lambda (x) (list x ''*unassigned*)) define-vars))
               (map (lambda (x y) (list 'set! x y)) define-vars define-vals)
-              rest-of-body))))
+              rest-of-body)))))
 
 ;; ==============================================================
 
@@ -414,19 +414,24 @@
         (list 'cons cons)
         (list 'null? null?)
         (list 'pair? pair?)
+        (list 'list list)
         (list 'equal? equal?)
         (list '+ +)
         (list '- -)
         (list '* *)
         (list '/ /)
+        (list 'remainder remainder)
         (list '= =)
         (list '< <)
         (list '> >)
+        (list '>= >=)
+        (list '<= <=)
         (list 'map map)
         (list 'filter filter)
         (list 'append append)
         (list 'display display)
         (list 'newline newline)
+        (list 'apply apply)
         (list 'accumulate accumulate)
         (list 'flat-map flat-map)
         ))
@@ -450,4 +455,18 @@
 (define (apply-primitive-procedure proc args)
   (apply-in-underlying-scheme
    (primitive-implementation proc) args))
+
+(define (prompt-for-input string)
+  (newline) (newline) (display string) (newline))
+
+(define (announce-output string)
+  (newline) (display string) (newline))
+
+(define (user-print object)
+  (if (compound-procedure? object)
+      (display (list 'compound-procedure
+                     (procedure-parameters object)
+                     (procedure-body object)
+                     '<procedure-env>))
+      (display object)))
 
